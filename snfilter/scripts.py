@@ -8,6 +8,8 @@ import requests
 
 log = logging.getLogger(__name__)
 
+from snfilter import parse_nameslist
+
 @click.group()
 def cli():
     pass
@@ -24,3 +26,12 @@ def pull(url, filename):
         f.close()
     else:
         log.error("Request for %s failed.", url)
+
+@cli.command()
+@click.option("--filename", default="grfeed.txt", help="file containing the sn gr feed to parse")
+@click.option("--nameslist", default="kf5uxa:Matt Dipirro,W5ZFQ:Andrew,Daniel Shaw", help="list of names to include in the filtered output")
+def filter(filename, nameslist):
+    with open(filename, "r") as f:
+        d = "".join([ l for l in f.readlines() ])
+        names, xlator = parse_nameslist(nameslist)
+        f = filter_feed(d, names, translator=xlator)
