@@ -8,7 +8,7 @@ import requests
 
 log = logging.getLogger(__name__)
 
-from snfilter import parse_nameslist, filter_feed, output_json, output_truvu
+from snfilter import parse_nameslist, filter_feed, output_json, output_truvu, output_gr
 
 @click.group()
 def cli():
@@ -32,8 +32,9 @@ def pull(url, filename):
 @click.option("--nameslist", default="kf5uxa:Matt Dipirro,Daniel Shaw,W5ZFQ:Andrew", help="list of names to include in the filtered output")
 @click.option("--outputfile", default=None, help="file to output to, otherwise stdout")
 @click.option("--indent", default=None, help="indentation level, when json output")
-@click.option("--outputformat", default="json", help="output format, default is json, can also be truvu")
-def filter(inputfile, nameslist, outputfile, indent, outputformat):
+@click.option("--outputformat", default="gr", help="output format, default is gr, can also be truvu or json")
+@click.option("--filtername", default="snfilter", help="set the feed name in gibson ridge output")
+def filter(inputfile, nameslist, outputfile, indent, outputformat, filtername):
     filtered_objects = None
     if indent is not None:
         indent = int(indent)
@@ -46,6 +47,8 @@ def filter(inputfile, nameslist, outputfile, indent, outputformat):
         output = output_json(filtered_objects, indent=indent)
     elif outputformat == "truvu":
         output = output_truvu(filtered_objects)
+    elif outputformat == "gr":
+        output = output_gr(filtered_objects, filtername=filtername)
 
     if outputfile:
         with open(outputfile, "w") as f:

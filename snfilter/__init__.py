@@ -11,7 +11,7 @@ gr_feed_preamble = """
 
 Refresh: 1
 Threshold: 999
-Title: Spotter Network Positions - Filtered by Netmanager
+Title: Spotter Network Positions - {filtername}
 Font: 1, 11, 0, "Courier New"
 IconFile: 1, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/spotternet.png"
 IconFile: 2, 15, 25, 8, 25, "http://www.spotternetwork.org/icon/arrows.png"
@@ -40,6 +40,14 @@ def output_truvu(objects):
             w.writerow(d)
         f.seek(0)
         return "".join(f.readlines())
+
+def output_gr(objects, filtername="snfilter"):
+    output = gr_feed_preamble.format(filtername=filtername)
+    for o in objects:
+        for l in o["origlines"]:
+            output = output + l + "\n"
+        output = output + "\n"
+    return output
 
 def parse_nameslist(nameslist):
     names = list()
