@@ -1,7 +1,9 @@
 import requests
-import sys
+import logging
 import json
+import sys
 
+log = logging.getLogger(__name__)
 
 gr_feed_preamble = """
 
@@ -14,6 +16,9 @@ IconFile: 2, 15, 25, 8, 25, "http://www.spotternetwork.org/icon/arrows.png"
 IconFile: 6, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/spotternet_new.png"
 
 """
+
+def output_json(objects, indent=None):
+    return json.dumps(objects, indent=indent)
 
 def parse_nameslist(nameslist):
     names = list()
@@ -28,7 +33,8 @@ def parse_nameslist(nameslist):
 
 def filter_feed(raw_feed, names, translator=dict()):
     all_objects = parse_raw_feed(raw_feed)
-    # filtered_objects = (invoke func that filteres the list based on names)
+    filtered_objects = filter_objects_byname(all_objects, names)
+    return filtered_objects
     # translated_objects = (invoke function that translates the names)
     # return filtered and translated list
 
@@ -39,23 +45,18 @@ def parse_objectlines(olines):
     ds = dict()
     ds["origlines"] = olines
 
-    # these keys are for the TruVu csv output
-    ds["Temperature"] = ""
-    ds["Weather"] = ""
-    ds["Station Name"] = ""
     for l in olines:
         if l.startswith("Object:"):
             oparts = l.split(":")
             if len(oparts) == 2:
                 llparts = oparts[1].split(",")
                 if len(llparts) == 2:
-                    ds['Latitude'] = float(llparts[0])
-                    ds['Longitude'] = float(llparts[1])
+                    ds['lat'] = float(llparts[0])
+                    ds['lon'] = float(llparts[1])
         if l.startswith("Text:"):
             tparts = l.split(",")
             if len(tparts) == 4:
                 ds["name"] = tparts[3].strip('"').lstrip(" ").lstrip("\"")
-                ds["Station Name"] = ds["name"] # TruVu CSV output
     return ds
 
 def parse_raw_feed(raw):
@@ -82,12 +83,10 @@ def parse_raw_feed(raw):
                 objectlines = list()
     return objects
 
-def filter_objects_byname(objects, namelist, translator=dict()):
+def filter_objects_byname(objects, namelist):
     lower_names = [ x.lower() for x in namelist ]
     filtered = list()
     for o in objects:
         if o["name"].lower() in lower_names:
-            if o["name"] in translator:
-                o["name"] = translator[o["name"]]
             filtered.append(o)
     return filtered

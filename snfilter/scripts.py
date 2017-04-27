@@ -8,7 +8,7 @@ import requests
 
 log = logging.getLogger(__name__)
 
-from snfilter import parse_nameslist
+from snfilter import parse_nameslist, filter_feed
 
 @click.group()
 def cli():
@@ -28,10 +28,20 @@ def pull(url, filename):
         log.error("Request for %s failed.", url)
 
 @cli.command()
-@click.option("--filename", default="grfeed.txt", help="file containing the sn gr feed to parse")
-@click.option("--nameslist", default="kf5uxa:Matt Dipirro,W5ZFQ:Andrew,Daniel Shaw", help="list of names to include in the filtered output")
-def filter(filename, nameslist):
-    with open(filename, "r") as f:
+@click.option("--inputfile", default="grfeed.txt", help="file containing the sn gr feed to parse")
+@click.option("--nameslist", default="kf5uxa:Matt Dipirro,Daniel Shaw,W5ZFQ:Andrew", help="list of names to include in the filtered output")
+@click.option("--outputfile", default=None, help="file to output to, otherwise stdout")
+@click.option("--indent", default=None, help="indentation level, when json output")
+def filter(inputfile, nameslist, outputfile, indent):
+    filtered_objects = None
+    if indent is not None:
+        indent = int(indent)
+    with open(inputfile, "r") as f:
         d = "".join([ l for l in f.readlines() ])
         names, xlator = parse_nameslist(nameslist)
-        f = filter_feed(d, names, translator=xlator)
+        filtered_objects = filter_feed(d, names, translator=xlator)
+    if outputfile:
+        with open(outputfile, "w") as f:
+            f.write(json.dumps(filtered_objects, indent=indent))
+    else:
+        click.echo(json.dumps(filtered_objects, indent=indent))
