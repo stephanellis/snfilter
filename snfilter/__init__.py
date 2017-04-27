@@ -2,6 +2,8 @@ import requests
 import logging
 import json
 import sys
+import csv
+import io
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +22,9 @@ IconFile: 6, 22, 22, 11, 11, "http://www.spotternetwork.org/icon/spotternet_new.
 def output_json(objects, indent=None):
     return json.dumps(objects, indent=indent)
 
+def output_truvu(objects):
+    pass
+
 def parse_nameslist(nameslist):
     names = list()
     xlator = dict()
@@ -34,9 +39,16 @@ def parse_nameslist(nameslist):
 def filter_feed(raw_feed, names, translator=dict()):
     all_objects = parse_raw_feed(raw_feed)
     filtered_objects = filter_objects_byname(all_objects, names)
+    filtered_objects = translate_objects(filtered_objects, translator=translator)
     return filtered_objects
     # translated_objects = (invoke function that translates the names)
     # return filtered and translated list
+
+def translate_objects(objects, translator=dict()):
+    for o in objects:
+        if o["name"] in translator:
+            o["name"] = translator[o["name"]]
+    return objects
 
 def parse_objectlines(olines):
     log.debug("parsing a set of object lines")
