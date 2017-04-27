@@ -8,7 +8,7 @@ import requests
 
 log = logging.getLogger(__name__)
 
-from snfilter import parse_nameslist, filter_feed
+from snfilter import parse_nameslist, filter_feed, output_json, output_truvu
 
 @click.group()
 def cli():
@@ -32,7 +32,8 @@ def pull(url, filename):
 @click.option("--nameslist", default="kf5uxa:Matt Dipirro,Daniel Shaw,W5ZFQ:Andrew", help="list of names to include in the filtered output")
 @click.option("--outputfile", default=None, help="file to output to, otherwise stdout")
 @click.option("--indent", default=None, help="indentation level, when json output")
-def filter(inputfile, nameslist, outputfile, indent):
+@click.option("--outputformat", default="json", help="output format, default is json, can also be truvu")
+def filter(inputfile, nameslist, outputfile, indent, outputformat):
     filtered_objects = None
     if indent is not None:
         indent = int(indent)
@@ -40,8 +41,14 @@ def filter(inputfile, nameslist, outputfile, indent):
         d = "".join([ l for l in f.readlines() ])
         names, xlator = parse_nameslist(nameslist)
         filtered_objects = filter_feed(d, names, translator=xlator)
+    output = ""
+    if outputformat == "json":
+        output = output_json(filtered_objects, indent=indent)
+    elif outputformat == "truvu":
+        output = output_truvu(filtered_objects)
+
     if outputfile:
         with open(outputfile, "w") as f:
-            f.write(json.dumps(filtered_objects, indent=indent))
+            f.write(output)
     else:
-        click.echo(json.dumps(filtered_objects, indent=indent))
+        click.echo(output)

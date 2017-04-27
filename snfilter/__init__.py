@@ -23,7 +23,23 @@ def output_json(objects, indent=None):
     return json.dumps(objects, indent=indent)
 
 def output_truvu(objects):
-    pass
+    with io.StringIO() as f:
+        w = csv.DictWriter(f, fieldnames=["ID", "Station Name", "Latitude", "Longitude", "Temperature", "Weather"])
+        w.writerow({"ID":"ID","Station Name":"Station Name","Latitude":"Latitude","Longitude":"Longitude","Temperature":"Temperature","Weather":"Weather"})
+        c = 0
+        for o in objects:
+            c += 1
+            d = {
+                "ID":c,
+                "Station Name": o["name"],
+                "Latitude": o["lat"],
+                "Longitude": o["lon"],
+                "Temperature": "55",
+                "Weather": "Sunny"
+            }
+            w.writerow(d)
+        f.seek(0)
+        return "".join(f.readlines())
 
 def parse_nameslist(nameslist):
     names = list()
