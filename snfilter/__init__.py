@@ -80,6 +80,7 @@ def parse_objectlines(olines):
     #build up a datastructure of the elements
     ds = dict()
     ds["origlines"] = olines
+    ds["icons"] = list()
 
     for l in olines:
         if l.startswith("Object:"):
@@ -93,7 +94,35 @@ def parse_objectlines(olines):
             tparts = l.split(",")
             if len(tparts) == 4:
                 ds["name"] = tparts[3].strip('"').lstrip(" ").lstrip("\"")
+        if l.startswith("Icon:"):
+            ds['icons'].append(parse_iconline(l))
     return ds
+
+def parse_iconline(line):
+    d = dict()
+    d["origline"] = line
+    # the following line is what we're looking for here, it's got some useful
+    # info we want to tease out
+    # Icon: 0,0,000,6,10,"Brandon Oboikovitz\n2017-04-30 20:16:22 UTC\nSTATIONARY\nPhone: 8153023601\nEmail: brandon59316@gmail.com"
+    # split out the icon part
+    parts1 = line.split("Icon: ")
+    # split out the properties
+    parts2 = parts1[1].split(",")
+    if len(parts2) == 6:
+        # we've got some interesting info to pick out if 6 elements
+        # we want this parts and split on \n
+        # "Brandon Oboikovitz\n2017-04-30 20:16:22 UTC\nSTATIONARY\nPhone: 8153023601\nEmail: brandon59316@gmail.com"
+        parts3 = parts2[5].lstrip('"').rstrip('"').split("\\n")
+        if len(parts3) >= 3:
+            d["desc"] = parts3[0]
+            d["last_beacon"] = parts3[1]
+            d["heading"] = parts3[2]
+            if len(parts3) > 3:
+                # not we split out the extra stuff
+                for p in parts3[3:]:
+                    parts4 = p.split(': ')
+                    d[parts4[0]] = parts4[1]
+    return d
 
 def parse_raw_feed(raw):
     lines = raw.split("\n")
