@@ -62,6 +62,8 @@ def filter_feed(raw_feed, names, translator=dict()):
 def translate_objects(objects, translator=dict()):
     for o in objects:
         if o["name"] in translator:
+            if "text" in o:
+                o["text"]["name"] = translator[o["name"]]
             o["name"] = translator[o["name"]]
     return objects
 
@@ -82,12 +84,25 @@ def parse_objectlines(olines):
                     ds['lat'] = float(llparts[0])
                     ds['lon'] = float(llparts[1])
         if l.startswith("Text:"):
+            ds["text"] = parse_textline(l)
             tparts = l.split(",")
             if len(tparts) == 4:
                 ds["name"] = tparts[3].strip('"').lstrip(" ").lstrip("\"")
         if l.startswith("Icon:"):
-            ds['icons'].append(parse_iconline(l))
+            ds['icon'] = parse_iconline(l)
     return ds
+
+def parse_textline(line):
+    d = dict()
+    d["origline"] = line
+    # working with the following line
+    # "Text: 15, 10, 1, \"KG5JTH\""
+    parts = line.split(": ")[1].split(", ")
+    d["x"] = parts[0]
+    d["y"] = parts[1]
+    d["fontnumber"] = parts[2]
+    d["name"] = parts[3].strip("\"")
+    return d
 
 def parse_iconline(line):
     d = dict()
@@ -110,9 +125,10 @@ def parse_iconline(line):
             d["heading"] = parts3[2]
             if len(parts3) > 3:
                 # not we split out the extra stuff
+                d["fields"] = dict()
                 for p in parts3[3:]:
                     parts4 = p.split(': ')
-                    d[parts4[0]] = parts4[1]
+                    d["fields"][parts4[0]] = parts4[1]
     return d
 
 def parse_raw_feed(raw):
