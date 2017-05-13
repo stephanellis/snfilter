@@ -28,5 +28,7 @@ information on the available options.
 
 Notice the W5ZFQ:Andrew part in the example nameslist option?  That will
 translate the name from the feed to what ever is after the : in the filtered
-output.  This is useful in the truvu output mode.  I'll eventually make is
-translate the text field in gibson ridge output as well.
+output.
+
+There is a web interface for this tool, which is available [here](https://github.com/stephanellis/snfilterweb).
+ A [live instance](https://snf.vortexok.net) of this webapp is available.
