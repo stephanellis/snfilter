@@ -35,10 +35,39 @@ def output_truvu(objects):
 def output_gr(objects, filtername="snfilter"):
     output = gr_feed_preamble.format(filtername=filtername)
     for o in objects:
-        for l in o["origlines"]:
-            output = output + l + "\n"
-        output = output + "\n"
+        output = output + create_placefile_object(o) + "\n"
     return output
+
+# Object: 34.6472816,-99.3139496
+# Icon: 0,0,000,6,10,"Lloyd Colston (KC5FM)\n2017-05-13 02:07:24 UTC\nSTATIONARY\nPhone: 9186152770\nEmail: kc5fm@arrl.org\nHam: Local Skywarn net\nTwitter: https://twitter.com/kc5fm\nWeb: altusem.blogspot.com\nNote: City of Altus Emergency Manager"
+# Text: 15, 10, 1, "KC5FM"
+# End:
+# from the spec: Icon:    lat, lon, angle, fileNumber, iconNumber, hoverText
+# from the spec: Text:    lat, lon, fontNumber, "string", "hover"
+def create_placefile_object(o):
+    buf = str()
+    buf += "Object: %s,%s\n" % (o["lat"], o["lon"])
+    buf += "Icon: %s,%s,%s,%s,%s,\"%s\"\\n%s\\n%s\\n%s\n" % (
+        o["icon"]["x"],
+        o["icon"]["y"],
+        o["icon"]["angle"],
+        o["icon"]["filenumber"],
+        o["icon"]["iconnumber"],
+        o["name"],
+        o["icon"]["last_beacon"],
+        o["icon"]["heading"],
+        # this is kinda ugly, but it combines all of the keys and values from
+        # the fields dict in the icon dict
+        "\\n".join([ "%s: %s" % (k , o["icon"]["fields"][k]) for k in o["icon"]["fields"].keys() ])
+    )
+    buf += "Text: %s,%s,%s, \"%s\"\n" % (
+        o["text"]["x"],
+        o["text"]["y"],
+        o["text"]["fontnumber"],
+        o["name"]
+    )
+    buf += "End:\n"
+    return buf
 
 def parse_nameslist(nameslist):
     names = list()
@@ -104,8 +133,10 @@ def parse_textline(line):
     d["name"] = parts[3].strip("\"")
     return d
 
+# from the spec: Icon:    lat, lon, angle, fileNumber, iconNumber, hoverText
 def parse_iconline(line):
     d = dict()
+    d["fields"] = dict()
     d["origline"] = line
     # the following line is what we're looking for here, it's got some useful
     # info we want to tease out
@@ -115,6 +146,11 @@ def parse_iconline(line):
     # split out the properties
     parts2 = parts1[1].split(",")
     if len(parts2) == 6:
+        d["x"] = parts2[0]
+        d["y"] = parts2[1]
+        d["angle"] = parts2[2]
+        d["filenumber"] = parts2[3]
+        d["iconnumber"] = parts2[4]
         # we've got some interesting info to pick out if 6 elements
         # we want this parts and split on \n
         # "Brandon Oboikovitz\n2017-04-30 20:16:22 UTC\nSTATIONARY\nPhone: 8153023601\nEmail: brandon59316@gmail.com"
@@ -125,7 +161,6 @@ def parse_iconline(line):
             d["heading"] = parts3[2]
             if len(parts3) > 3:
                 # not we split out the extra stuff
-                d["fields"] = dict()
                 for p in parts3[3:]:
                     parts4 = p.split(': ')
                     d["fields"][parts4[0]] = parts4[1]
