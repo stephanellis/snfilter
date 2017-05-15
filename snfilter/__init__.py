@@ -26,11 +26,15 @@ def output_json(objects, indent=None):
 def output_truvu(objects):
     headers = ('ID','Station Name', 'Latitude', 'Longitude')
     ds = tablib.Dataset(headers=headers)
-    c = 0
     for o in objects:
-        c += 1
-        ds.append((c, o["name"], o["lat"], o["lon"]))
+        ds.append((generate_truvu_id(o["name"]), o["name"], o["lat"], o["lon"]))
     return ds.csv
+
+def generate_truvu_id(name):
+    i = 0
+    for c in name:
+        i += ord(c)
+    return i * len(name)
 
 def output_gr(objects, filtername="snfilter"):
     output = gr_feed_preamble.format(filtername=filtername)
