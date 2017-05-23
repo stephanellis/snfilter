@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='snfilter',
-    version='0.4',
+    version='0.4.1',
     description='Spotter Network Filtered Feeds',
     url='https://github.com/stephanellis/snfilter',
     author='Stephan M Ellis',

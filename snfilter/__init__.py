@@ -51,13 +51,13 @@ def output_gr(objects, filtername="snfilter"):
 def create_placefile_object(o):
     buf = str()
     buf += "Object: %s,%s\n" % (o["lat"], o["lon"])
-    buf += "Icon: %s,%s,%s,%s,%s,\"%s\"\\n%s\\n%s\\n%s\n" % (
+    buf += "Icon: %s,%s,%s,%s,%s,\"%s\\n%s\\n%s\\n%s\"\n" % (
         o["icon"]["x"],
         o["icon"]["y"],
         o["icon"]["angle"],
         o["icon"]["filenumber"],
         o["icon"]["iconnumber"],
-        o["name"],
+        o["name"].strip('"'),
         o["icon"]["last_beacon"],
         o["icon"]["heading"],
         # this is kinda ugly, but it combines all of the keys and values from
