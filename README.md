@@ -1,14 +1,29 @@
 # snfilter
-Spotter Network Feed filter
-snfilter let's you take the gibson ridge feeds from spotternetwork and
-filter them down to just the spotters you actually want to see.  This is
-particularly helpful for spotter organizations that just want to see their
-own spotters during a major severe weather event.
+Spotter Network Gibson Ridge feed filter
+
+snfilter helps you filter the gibson ridge feeds from spotternetwork down to
+just the spotters you actually want to see.  This is particularly helpful for
+spotter organizations that just want to see their own spotters during a major
+severe weather event.
 
 You can see the [spotter network gibson ridge feeds page](http://www.spotternetwork.org/pages/feeds/gibson-ridge)
  for more information.
 
- When you install this package, you get a command line utility called
+This package can also convert the output to other formats, such as json and
+TruVu Max Navigated CSV.  Please note that if you use the output for
+commercial purposes, you must contact the spotter network and get permission to
+use the data in your broadcast.
+
+Additional formats can be supported.  If you'd like to see a particular output
+format, please create an issue in github and I'd consider hacking it in.
+
+To install, use this:
+
+```
+pip install snfilter
+```
+
+ After installing this package, you get a command line utility called
  snfilter-cli that allows you to filter those feeds in a scheduled task or
  cron job.  Simply pull the feed like this:
 
