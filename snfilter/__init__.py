@@ -119,8 +119,11 @@ def parse_objectlines(olines):
         if l.startswith("Text:"):
             ds["text"] = parse_textline(l)
             tparts = l.split(",")
-            if len(tparts) == 4:
-                ds["name"] = tparts[3].strip('"').lstrip(" ").lstrip("\"")
+            if len(tparts) > 3:
+                name = ""
+                for textchunk in tparts[3:]:
+                    name = name + tparts[3].strip('"').lstrip(" ").lstrip("\"")
+                ds["name"] = name
         if l.startswith("Icon:"):
             ds['icon'] = parse_iconline(l)
     return ds
